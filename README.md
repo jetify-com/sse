@@ -1,6 +1,6 @@
 # sse – Server‑Sent Events for Go
 
-### A tiny, dependency‑free package that makes it easy to use SSE streaming with any HTTP framework.
+### A tiny, dependency‑free library that makes it easy to use SSE streaming with any HTTP framework.
 
 [![Version](https://img.shields.io/github/v/release/jetify-com/sse?color=green&label=version&sort=semver)](https://github.com/jetify-com/sse/releases)
 [![Go Reference](https://pkg.go.dev/badge/go.jetify.com/sse)](https://pkg.go.dev/go.jetify.com/sse)
@@ -10,6 +10,12 @@
 *Primary Author(s)*: [Daniel Loreto](https://github.com/loreto)
 
 ---
+
+## Introduction
+Jetify's `sse` package is a tiny, dependency‑free library that makes it easy to use SSE streaming with any HTTP framework.
+
+It is maintained and developed by [Jetify](https://www.jetify.com) and used by our AI agents to handle
+SSE in production settings.
 
 ## ✨ Features
 
