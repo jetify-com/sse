@@ -87,7 +87,7 @@ func Upgrade(ctx context.Context, w http.ResponseWriter, opts ...Option) (*Conn,
 	// Auto-close when client disconnects.
 	go func() {
 		<-c.ctx.Done()
-		c.Close()
+		_ = c.Close()
 	}()
 
 	return c, nil
@@ -279,7 +279,7 @@ func (c *Conn) runHeartbeat(ctx context.Context, tickerC <-chan time.Time) {
 			hbCtx, cancel := context.WithTimeout(ctx, c.writeTimeout)
 			if err := c.sendHeartbeat(hbCtx); err != nil {
 				cancel()
-				c.Close()
+				_ = c.Close()
 				return
 			}
 			cancel()

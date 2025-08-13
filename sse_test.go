@@ -192,7 +192,7 @@ func TestSSEIntegration(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				conn, err := Upgrade(r.Context(), w, testCase.opts...)
 				require.NoError(t, err)
-				defer conn.Close()
+				defer func() { _ = conn.Close() }()
 
 				// Send all events
 				for _, event := range testCase.events {
@@ -205,7 +205,7 @@ func TestSSEIntegration(t *testing.T) {
 			// Make request to test server
 			resp, err := http.Get(server.URL)
 			require.NoError(t, err)
-			defer resp.Body.Close()
+			defer func() { _ = resp.Body.Close() }()
 
 			// Verify headers
 			assert.Equal(t, "text/event-stream", resp.Header.Get("Content-Type"))
@@ -231,7 +231,7 @@ func TestSSEConnectionClose(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		conn, err := Upgrade(r.Context(), w, WithRetryDelay(0), WithCloseMessage(&Event{Data: "goodbye"}))
 		require.NoError(t, err)
-		defer conn.Close()
+		defer func() { _ = conn.Close() }()
 
 		// Send a message
 		err = conn.SendEvent(r.Context(), &Event{Data: "hello"})
@@ -242,7 +242,7 @@ func TestSSEConnectionClose(t *testing.T) {
 	// Make request to test server
 	resp, err := http.Get(server.URL)
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Create decoder to read events
 	dec := NewDecoder(resp.Body)
@@ -275,7 +275,7 @@ func TestSSEContextCancellation(t *testing.T) {
 
 		conn, err := Upgrade(ctx, w, WithRetryDelay(0))
 		require.NoError(t, err)
-		defer conn.Close()
+		defer func() { _ = conn.Close() }()
 
 		// Send a message
 		err = conn.SendEvent(ctx, &Event{Data: "hello"})
@@ -293,7 +293,7 @@ func TestSSEContextCancellation(t *testing.T) {
 	// Make request to test server
 	resp, err := http.Get(server.URL)
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Create decoder to read events
 	dec := NewDecoder(resp.Body)
@@ -340,7 +340,7 @@ func TestConn_SendData(t *testing.T) {
 			w := httptest.NewRecorder()
 			conn, err := Upgrade(t.Context(), w, WithRetryDelay(0))
 			require.NoError(t, err)
-			defer conn.Close()
+			defer func() { _ = conn.Close() }()
 
 			err = conn.SendData(t.Context(), tt.data)
 
@@ -389,7 +389,7 @@ func TestConn_SendComment(t *testing.T) {
 			w := httptest.NewRecorder()
 			conn, err := Upgrade(t.Context(), w, WithRetryDelay(0))
 			require.NoError(t, err)
-			defer conn.Close()
+			defer func() { _ = conn.Close() }()
 
 			err = conn.SendComment(t.Context(), tt.comment)
 			require.NoError(t, err)
@@ -404,7 +404,7 @@ func TestConn_SendComment_ContextCanceled(t *testing.T) {
 	w := httptest.NewRecorder()
 	conn, err := Upgrade(t.Context(), w, WithRetryDelay(0))
 	require.NoError(t, err)
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	// Create a canceled context
 	ctx, cancel := context.WithCancel(t.Context())
@@ -431,7 +431,7 @@ func TestConn_Heartbeat(t *testing.T) {
 	time.Sleep(interval + 20*time.Millisecond)
 
 	// Close the connection to stop heartbeats
-	conn.Close()
+	_ = conn.Close()
 
 	// Verify output contains the heartbeat comment
 	output := w.Body.String()

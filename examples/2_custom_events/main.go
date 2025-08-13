@@ -26,7 +26,7 @@ func main() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		defer conn.Close()
+		defer func() { _ = conn.Close() }()
 
 		// Simulate stock updates for different symbols
 		symbols := []string{"AAPL", "GOOGL", "MSFT"}
@@ -55,7 +55,7 @@ func main() {
 				}
 			case <-r.Context().Done():
 				// Send a close message when client disconnects
-				conn.SendEvent(r.Context(), &sse.Event{
+				_ = conn.SendEvent(r.Context(), &sse.Event{
 					Event: "close",
 					Data:  "Stream closed by client",
 				})

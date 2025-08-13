@@ -33,7 +33,7 @@ func main() {
 
 func connectAndProcess(ctx context.Context, lastEventID *string, retryDelay *time.Duration) error {
 	// Create request with Last-Event-ID if we have one
-	req, err := http.NewRequestWithContext(ctx, "GET", "http://localhost:8080/stocks", nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, "http://localhost:8080/stocks", nil)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
@@ -46,7 +46,7 @@ func connectAndProcess(ctx context.Context, lastEventID *string, retryDelay *tim
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("server returned %d", resp.StatusCode)

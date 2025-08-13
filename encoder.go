@@ -53,17 +53,17 @@ func writeEvent(w io.Writer, e *Event) error {
 
 	// ----- id -----
 	if e.ID != "" {
-		fmt.Fprintf(w, "id: %s\n", e.ID)
+		_, _ = fmt.Fprintf(w, "id: %s\n", e.ID)
 	}
 
 	// ----- retry -----
 	if e.Retry > 0 {
-		fmt.Fprintf(w, "retry: %d\n", e.Retry.Milliseconds())
+		_, _ = fmt.Fprintf(w, "retry: %d\n", e.Retry.Milliseconds())
 	}
 
 	// ----- event -----
 	if e.Event != "" && e.Event != "message" {
-		fmt.Fprintf(w, "event: %s\n", e.Event)
+		_, _ = fmt.Fprintf(w, "event: %s\n", e.Event)
 	}
 
 	// ----- data -----
@@ -81,14 +81,14 @@ func writeEvent(w io.Writer, e *Event) error {
 	}
 
 	// ----- blank line -----
-	fmt.Fprint(w, "\n")
+	_, _ = fmt.Fprint(w, "\n")
 	return nil
 }
 
 // writeComment writes an SSE comment to the provided io.Writer.
 // Comments in SSE are lines that start with a colon (:).
 func writeComment(w io.Writer, c string) error {
-	fmt.Fprintf(w, ": %s\n", c)
+	_, _ = fmt.Fprintf(w, ": %s\n", c)
 	return nil
 }
 
@@ -162,5 +162,5 @@ func splitAndWriteLines(w io.Writer, v Raw) {
 // writeData writes a single SSE data line to the provided io.Writer.
 // It prefixes the data with "data: " and appends a newline.
 func writeData(w io.Writer, b []byte) {
-	fmt.Fprintf(w, "data: %s\n", b)
+	_, _ = fmt.Fprintf(w, "data: %s\n", b)
 }
