@@ -90,6 +90,48 @@ func TestDecoder(t *testing.T) {
 			expected: nil,
 		},
 		{
+			name:  "data beginning with colon",
+			input: "data: :hello\n\n",
+			expected: []Event{
+				{Data: Raw(":hello")},
+			},
+		},
+		{
+			name:  "data beginning with colon without separator space",
+			input: "data::hello\n\n",
+			expected: []Event{
+				{Data: Raw(":hello")},
+			},
+		},
+		{
+			name:  "data containing only a colon",
+			input: "data: :\n\n",
+			expected: []Event{
+				{Data: Raw(":")},
+			},
+		},
+		{
+			name:  "multiline colon data with comments and metadata",
+			input: ": before\nid: 42\nevent: update\nretry: 5000\ndata: :first\n: between\ndata: second\n\n",
+			expected: []Event{
+				{
+					ID:    "42",
+					Event: "update",
+					Retry: 5000 * time.Millisecond,
+					Data:  Raw(":first\nsecond"),
+					Split: true,
+				},
+			},
+		},
+		{
+			name:  "colon data followed by another event",
+			input: "data: :first\n\ndata: second\n\n",
+			expected: []Event{
+				{Data: Raw(":first")},
+				{Data: Raw("second")},
+			},
+		},
+		{
 			name:  "multiple colons in data",
 			input: "data: key: value: test\n\n",
 			expected: []Event{
@@ -692,6 +734,26 @@ func TestEvent_UnmarshalText(t *testing.T) {
 				require.NoError(t, err)
 				assert.Equal(t, tt.expected, ev)
 			}
+		})
+	}
+}
+
+func TestEvent_TextRoundTripWithColonData(t *testing.T) {
+	for _, data := range []Raw{Raw(":"), Raw(":hello"), Raw(":first\nsecond")} {
+		t.Run(string(data), func(t *testing.T) {
+			original := Event{
+				ID:    "42",
+				Event: "update",
+				Retry: 5000 * time.Millisecond,
+				Data:  data,
+				Split: strings.Contains(string(data), "\n"),
+			}
+			text, err := original.MarshalText()
+			require.NoError(t, err)
+
+			var decoded Event
+			require.NoError(t, decoded.UnmarshalText(text))
+			assert.Equal(t, original, decoded)
 		})
 	}
 }

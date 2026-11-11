@@ -160,13 +160,7 @@ func (d *Decoder) dispatchEvent(event *Event, dataBuf, eventType string, dataLin
 	}
 	event.Split = dataLines > 1
 
-	// Decide Data vs Comment and JSON decode if possible.
-	if !strings.HasPrefix(dataBuf, ":") {
-		d.parseEventData(event, dataBuf)
-	}
-	// else {
-	// 	// If we ever want to return comments as events, we can do it here.
-	// }
+	d.parseEventData(event, dataBuf)
 
 	return nil
 }
